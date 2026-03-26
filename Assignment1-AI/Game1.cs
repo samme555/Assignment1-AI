@@ -16,9 +16,10 @@ namespace Assignment1_AI
 
         public List<Enemy> enemies = new List<Enemy>();
         private Random random = new Random();
+        private List<Bullet> bullets = new List<Bullet>();
 
         private float spawnTimer = 0f;
-        private float spawnInterval = 2f;
+        private float spawnInterval = 1f;
         private int maxEnemies = 10;
 
         public Game1()
@@ -66,6 +67,31 @@ namespace Assignment1_AI
                 enemy.Update(gameTime, player);
             }
 
+            Bullet newBullet = player.AttackNearestEnemy(enemies);
+            if (newBullet != null)
+            {
+                bullets.Add(newBullet);
+            }
+
+            foreach (var bullet in bullets)
+            {
+                bullet.Update(gameTime);
+            }
+
+            enemies.RemoveAll(enemy => enemy.IsDead());
+
+            foreach (var bullet in bullets)
+            {
+                foreach (var enemy in enemies)
+                {
+                    if (bullet.IsActive() && bullet.GetBounds().Intersects(enemy.GetBounds()))
+                    {
+                        enemy.TakeDamage(bullet.GetDamage());
+                        bullet.Deactivate();
+                    }
+                }
+            }
+
             base.Update(gameTime);
         }
 
@@ -79,6 +105,11 @@ namespace Assignment1_AI
             foreach (Enemy enemy in enemies)
             {
                 enemy.Draw(spriteBatch);
+            }
+
+            foreach (var bullet in bullets)
+            {
+                bullet.Draw(spriteBatch);
             }
 
             spriteBatch.End();
@@ -114,9 +145,9 @@ namespace Assignment1_AI
             bool spawnFSM = random.Next(2) == 0;
 
             if (spawnFSM)
-                enemies.Add(new FSMAgent(pixel, spawnPosition));
+                enemies.Add(new FSMAgent(pixel, spawnPosition, player));
             else
-                enemies.Add(new DTAgent(pixel, spawnPosition));
+                enemies.Add(new DTAgent(pixel, spawnPosition, player));
         }
     }
 }

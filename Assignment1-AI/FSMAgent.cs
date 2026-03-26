@@ -6,20 +6,46 @@ namespace Assignment1_AI
 {
     public class FSMAgent : Enemy
     {
-        public FSMAgent(Texture2D pixel, Vector2 startPos)
+        private FSMAgentState currentState;
+        private Player player;
+        public FSMAgent(Texture2D pixel, Vector2 startPos, Player player)
             : base(pixel, startPos, 100f, Color.Red)
         {
+            this.player = player;
+            ChangeState(new TargetState(this));
         }
 
         public override void Update(GameTime gameTime, Player player)
         {
-            Vector2 direction = player.GetPosition() - position;
+            if (currentState != null)
+            {
+                currentState.Update(gameTime);
+            }
+        }
 
-            if (direction != Vector2.Zero)
-                direction.Normalize();
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+            spriteBatch.Draw(pixel, new Rectangle((int)position.X, (int)position.Y, 20, 20), Color.Blue);
+        }
 
-            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            position += direction * speed * dt;
+        public void ChangeState(FSMAgentState newState)
+        {
+            if (currentState != null)
+            {
+                currentState.Exit();
+            }
+
+            currentState = newState;
+
+            if (currentState != null)
+            {
+                currentState.Enter();
+            }
+        }
+
+        public Player GetPlayer()
+        {
+            return player;
         }
     }
 }
