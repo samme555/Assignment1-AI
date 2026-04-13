@@ -78,7 +78,7 @@ namespace Assignment1_AI
                 bullet.Update(gameTime);
             }
 
-            enemies.RemoveAll(enemy => enemy.IsDead());
+            enemies.RemoveAll(enemy => enemy.IsDead() || enemy.IsMarkedForRemoval());
 
             foreach (var bullet in bullets)
             {
@@ -145,7 +145,7 @@ namespace Assignment1_AI
             bool spawnFSM = random.Next(2) == 0;
 
             if (spawnFSM)
-                enemies.Add(new FSMAgent(pixel, spawnPosition, player));
+                enemies.Add(new FSMAgent(pixel, spawnPosition, player, enemies));
             else
                 enemies.Add(new DTAgent(pixel, spawnPosition, player));
         }
